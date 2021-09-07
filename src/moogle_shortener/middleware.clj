@@ -4,9 +4,9 @@
                                             ->kebab-case-keyword]]
             [camel-snake-kebab.extras :refer [transform-keys]]
             [reitit.ring.middleware.exception :as exception]
-            [clojure.tools.logging :as log])
-  (:import (clojure.lang ExceptionInfo)
-           (java.sql SQLException)))
+            [clojure.tools.logging :as log]
+            [moogle-shortener.config :as config])
+  (:import (clojure.lang ExceptionInfo)))
 
 (defn wrap-trailing-slash
   "
@@ -27,11 +27,11 @@
           request (update req :uri trailing-slash-fn)]
       (handler request))))
 
-#_(defn wrap-db
-    "Wraps the database connection"
-    [handler]
-    (fn [req]
-      (handler (assoc req :short/db @config/datasource))))
+(defn wrap-db
+  "Wraps the database connection"
+  [handler]
+  (fn [req]
+    (handler (assoc req :moogle-shortener/db @config/datasource))))
 
 (defn- bad-request [msg]
   {:status  400

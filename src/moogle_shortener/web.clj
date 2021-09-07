@@ -15,7 +15,7 @@
             [malli.util :as mu]
             [cheshire.core :as json]
             [moogle-shortener.core :as core]
-            [moogle-shortener.middleware :refer [#_wrap-db
+            [moogle-shortener.middleware :refer [wrap-db
                                                  wrap-trailing-slash
                                                  wrap-kebab-keys
                                                  wrap-snakecase-keys
@@ -71,7 +71,7 @@
    :parameters {:form [:map
                        [:url schema-valid-url?]]}
    :handler (fn [req]
-              (success (core/shortener req)))})
+              (success (core/shortener (:moogle-shortener/db req) req)))})
 
 (def handle-main-page
   {:summary "Exibe a versão da aplicação em execução"
@@ -147,7 +147,7 @@
                              multipart/multipart-middleware
                              ;; custom
                              wrap-kebab-keys
-                             #_wrap-db]}
+                             wrap-db]}
 
         ["/shortener" {:post handle-shortener}]
         ["/version" {:get handle-show-version}]]]
