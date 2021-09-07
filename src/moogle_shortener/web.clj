@@ -20,8 +20,12 @@
                                                  wrap-kebab-keys
                                                  wrap-snakecase-keys
                                                  exception-middleware
-                                                 wrap-log-request-time]])
+                                                 wrap-log-request-time]]
+            [ring.util.response :as response]
+            [clojure.tools.logging :as log]
+            [moogle-shortener.config :as config])
   (:import (java.util Properties)
+           (java.time Instant)
            (org.apache.commons.validator.routines UrlValidator)))
 
 (defn- api-url [{:keys [scheme server-name server-port]}]
@@ -67,15 +71,37 @@
      :pred #(valid-url? %)}))
 
 (def handle-shortener
-  {:summary ""
+  {:summary    ""
    :parameters {:form [:map
                        [:url schema-valid-url?]]}
-   :handler (fn [req]
-              (success (core/shortener (:moogle-shortener/db req) req)))})
+   :handler    (fn [req]
+                 {:status  200
+                  :body    (core/shortener! (:moogle-shortener/db req) req)
+                  :headers {}})})
 
 (def handle-main-page
   {:summary "Exibe a versão da aplicação em execução"
    :handler core/main-page})
+
+(def handle-redirect
+  {:summary "Redirect to the URL shortened"
+   :handler (fn [req]
+              (let [db (:moogle-shortener/db req)
+                    id (get-in req [:path-params :id])
+                    access {:id      id
+                            :ip      (:remote-addr req)
+                            :header  (dissoc (:headers req) "cookie")
+                            :created (Instant/now)}]
+                (core/save-access! db access)
+                (if-let [redirect (core/shortener db id)]
+                  (do
+                    (log/info "redirecting..." redirect)
+                    (response/redirect redirect))
+                  (not-found))))})
+
+(comment
+  (core/shortener @config/datasource "deH5wiJ6")
+  prn)
 
 (def handle-swagger
   {:no-doc  true
@@ -99,59 +125,41 @@
                             :options          nil})
                :muuntaja m/instance}})
 
+(def default-middleware
+  [;;custom
+   wrap-log-request-time
+   ;; query-params & form-params
+   parameters/parameters-middleware
+   ;wrap-fetch-parameters
+   ;; content-negotiation
+   muuntaja/format-negotiate-middleware
+   ;; encoding response body
+   muuntaja/format-response-middleware
+   ;; custom
+   wrap-snakecase-keys
+   ;; custom
+   exception-middleware
+   ;; decoding request body
+   muuntaja/format-request-middleware
+   ;; coercing response bodys
+   coercion/coerce-response-middleware
+   ;; coercing request parameters
+   coercion/coerce-request-middleware
+   ;; multipart
+   multipart/multipart-middleware
+   ;; custom
+   wrap-kebab-keys
+   wrap-db])
+
 (def app
   (ring/ring-handler
     (ring/router
-      [["/" {:get handle-main-page}]
-       ["/swagger.json" {:middleware [swagger/swagger-feature
-                                      ;; query-params & form-params
-                                      parameters/parameters-middleware
-                                      ;; content-negotiation
-                                      muuntaja/format-negotiate-middleware
-                                      ;; encoding response body
-                                      muuntaja/format-response-middleware
-                                      ;; exception handling (customizado)
-                                      ;exception-middleware
-                                      ;exception/exception-middleware
-                                      ;; decoding request body
-                                      muuntaja/format-request-middleware
-                                      ;; coercing response bodys
-                                      coercion/coerce-response-middleware
-                                      ;; coercing request parameters
-                                      coercion/coerce-request-middleware
-                                      ;; multipart
-                                      multipart/multipart-middleware]
-                         :get        handle-swagger}]
-
-       ["/api" {:swagger {:tags ["api"]}
-                :middleware [;;custom
-                             wrap-log-request-time
-                             ;; query-params & form-params
-                             parameters/parameters-middleware
-                             ;wrap-fetch-parameters
-                             ;; content-negotiation
-                             muuntaja/format-negotiate-middleware
-                             ;; encoding response body
-                             muuntaja/format-response-middleware
-                             ;; custom
-                             wrap-snakecase-keys
-                             ;; custom
-                             exception-middleware
-                             ;; decoding request body
-                             muuntaja/format-request-middleware
-                             ;; coercing response bodys
-                             coercion/coerce-response-middleware
-                             ;; coercing request parameters
-                             coercion/coerce-request-middleware
-                             ;; multipart
-                             multipart/multipart-middleware
-                             ;; custom
-                             wrap-kebab-keys
-                             wrap-db]}
-
-        ["/shortener" {:post handle-shortener}]
-        ["/version" {:get handle-show-version}]]]
-
+      [["/" {:get        handle-main-page
+             :swagger    {:tags ["api"]}
+             :middleware default-middleware}]
+       ["/shortener" {:post handle-shortener :conflicting true :middleware default-middleware}]
+       ["/version" {:get handle-show-version :conflicting true :middleware default-middleware}]
+       ["/{id}" {:get handle-redirect :conflicting true :middleware default-middleware}]]
       router-opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler

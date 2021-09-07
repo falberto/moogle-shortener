@@ -2,36 +2,41 @@
   (:require [clojure.tools.logging :as log]
             [moogle-shortener.html :as html]
             [nano-id.core :as nano]
-            [ring.util.response :as response]
             [moogle-shortener.config :as config]
+            [moogle-shortener.db :as db]
             [next.jdbc.sql :as sql])
   (:import (java.time Instant)))
 
+(defonce SHORTENED "shortened")
+
 (defn- api-url [{:keys [scheme server-name server-port]}]
-  (str (name scheme) "://" server-name ":" server-port "/api"))
+  (str (name scheme) "://" server-name ":" server-port))
 
 (defn main-page [req]
-  {:status 200
-   :body (html/greet-page)
+  {:status  200
+   :body    (html/greet-page)
    :headers {}})
 
-(defn- register!
+(defn- save-shortener!
   "Register in the database all relevant info from request and the URL shortened"
   [db register]
-  (sql/insert! db :shortened register))
+  (db/insert! db :shortened register))
 
-(comment
-  (sql/insert! @config/datasource
-               :shortened
-               {:id        1
-                :url       1
-                :shortened 1
-                :ip        1
-                :created   (Instant/now)})
-  prn)
+(defn save-access!
+  "Register in the database all relevant info from URL shortened access"
+  [db access]
+  (db/insert! db :access access))
 
-(defn shortener [db req]
-  (def s req)
+
+(defn shortener [db id]
+  (-> (db/query db
+                 [(str "select url from " SHORTENED " where id = ?")
+                  id])
+      first
+      :url))
+
+(defn shortener! [db req]
+  (log/info "Shortining URL... [" (get-in req [:form-params "url"]) "]")
   (let [base-url (api-url req)
         id (nano/nano-id (:size config/nano))
         url (get-in req [:form-params "url"])
@@ -41,9 +46,8 @@
                   :shortened (str base-url "/" id)
                   :ip        ip
                   :created   (Instant/now)}]
-    (println register)
-    (register! db register)))
-
+    (save-shortener! db register)
+    (html/shortener (str base-url "/" id))))
 
 (defn -main [& args]
   (log/info "Starting App..."))
