@@ -21,7 +21,8 @@
                                                  wrap-snakecase-keys
                                                  exception-middleware
                                                  wrap-log-request-time]])
-  (:import (java.util Properties)))
+  (:import (java.util Properties)
+           (org.apache.commons.validator.routines UrlValidator)))
 
 (defn- api-url [{:keys [scheme server-name server-port]}]
   (str (name scheme) "://" server-name ":" server-port "/api"))
@@ -56,24 +57,21 @@
                    :headers {"Content-Type" "application/json"}
                    :body    (json/generate-string pom)})))})
 
+(defn valid-url? [url]
+  (let [schemes (into-array String ["http" "https"])]
+    (.isValid (UrlValidator. schemes) url)))
+
+(def schema-valid-url?
+  (malli.core/-simple-schema
+    {:type :user/schema-valid-url?
+     :pred #(valid-url? %)}))
+
 (def handle-shortener
   {:summary ""
+   :parameters {:form [:map
+                       [:url schema-valid-url?]]}
    :handler (fn [req]
-              {:status  200
-               :headers {"Content-Type" "application/json"}
-               :body    (json/generate-string (select-keys req
-                                                           [:server-port :server-name :remote-addr :uri :character-encoding
-                                                            :path-params
-                                                            :query-string
-                                                            :request-method
-                                                            :scheme
-                                                            :content-type
-                                                            :content-length
-                                                            :headers
-                                                            :protocol
-                                                            :ssl-client-cert]))})})
-
-
+              (success (core/shortener req)))})
 
 (def handle-main-page
   {:summary "Exibe a versão da aplicação em execução"
@@ -105,8 +103,6 @@
   (ring/ring-handler
     (ring/router
       [["/" {:get handle-main-page}]
-       ["/api/shortener" {:post handle-shortener}]
-       ["/api/version" {:get handle-show-version}]
        ["/swagger.json" {:middleware [swagger/swagger-feature
                                       ;; query-params & form-params
                                       parameters/parameters-middleware
@@ -127,7 +123,8 @@
                                       multipart/multipart-middleware]
                          :get        handle-swagger}]
 
-       ["/api" {:middleware [;;custom
+       ["/api" {:swagger {:tags ["api"]}
+                :middleware [;;custom
                              wrap-log-request-time
                              ;; query-params & form-params
                              parameters/parameters-middleware
@@ -152,8 +149,8 @@
                              wrap-kebab-keys
                              #_wrap-db]}
 
-        #_["/show" {:swagger {:tags ["api"]}
-                    :post handle-postman-send}]]]
+        ["/shortener" {:post handle-shortener}]
+        ["/version" {:get handle-show-version}]]]
 
       router-opts)
     (ring/routes
