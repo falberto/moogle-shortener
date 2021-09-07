@@ -18,8 +18,9 @@
                  [nano-id "1.0.0"]
                  [cheshire "5.10.1"]
                  [borkdude/sci "0.2.6"]
-                 [org.webjars.npm/bulma "0.9.2"]
-                 [org.webjars.npm/material-icons "1.0.0"]]
+                 [org.xerial/sqlite-jdbc "3.36.0.1"]
+                 [com.github.seancorfield/next.jdbc "1.2.689"]]
+
   :main moogle-shortener.core
   ;:aot :all
   :profiles {:dev     {:source-paths ["dev"]
