@@ -47,7 +47,7 @@
                   :ip        ip
                   :created   (Instant/now)}]
     (save-shortener! db register)
-    (html/shortener (str base-url "/" id))))
+    (html/shortener (assoc register :host base-url))))
 
 (defn -main [& args]
   (log/info "Starting App..."))

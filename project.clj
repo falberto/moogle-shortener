@@ -27,6 +27,7 @@
                        :dependencies [[org.clojure/test.check "1.1.0"]
                                       [ch.qos.logback/logback-classic "1.2.5"]]}}
   :omit-source true
+  :resource-paths ["resources"]
   :plugins [[lein-environ "1.2.0"]
             [lein-ring "0.12.5"]]
   :repl-options {:init-ns moogle-shortener.core}

@@ -10,6 +10,7 @@
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
             [ring.middleware.params :refer [wrap-params]]
+            [ring.middleware.resource :refer [wrap-resource]]
             [clojure.java.io :as io]
             [muuntaja.core :as m]
             [malli.util :as mu]
@@ -159,6 +160,7 @@
              :middleware default-middleware}]
        ["/shortener" {:post handle-shortener :conflicting true :middleware default-middleware}]
        ["/version" {:get handle-show-version :conflicting true :middleware default-middleware}]
+       ["/assets/*" (ring/create-resource-handler)]
        ["/{id}" {:get handle-redirect :conflicting true :middleware default-middleware}]]
       router-opts)
     (ring/routes

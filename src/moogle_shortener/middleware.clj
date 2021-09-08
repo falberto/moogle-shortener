@@ -113,16 +113,16 @@
 
 (defn wrap-log-request-time [handler]
   (fn [req]
-    (log/info ">>>")
-    (log/info (str/upper-case (name (:request-method req)))
+    (log/debug ">>>")
+    (log/debug (str/upper-case (name (:request-method req)))
               (:uri req))
     (let [init-time (System/currentTimeMillis)
           response (handler req)
           end-time (System/currentTimeMillis)]
-      (log/info (str/upper-case (name (:request-method req)))
+      (log/debug (str/upper-case (name (:request-method req)))
                 (:uri req)
                 (str "(" (- end-time init-time) "ms)"))
-      (log/info "<<<")
+      (log/debug "<<<")
       response)))
 
 (comment
