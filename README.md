@@ -1,10 +1,12 @@
 # moogle-shortener
 
-A Clojure library designed to ... well, that part is up to you.
+Moogle Shortener is a website that will allow you make URL Shortener.
 
-## Usage
-
-FIXME
+I did this project as an exercise to improve my clojure skills.
+Technologies used:
+- Reiit - A fast data-driven router for Clojure(Script).
+- Hiccup - A library for representing HTML in Clojure.
+- Ring - A Clojure web applications library inspired by Python's WSGI and Ruby's Rack
 
 ## License
 
