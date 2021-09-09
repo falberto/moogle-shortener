@@ -51,7 +51,7 @@
                    [:div {:class "control is-expanded"}
                     [:input {:class "input is-large" :type "text" :value (:shortened register) :read-only true}]]
                    [:div {:class "control"}
-                    [:button {:class "button is-success is-large"} "Copy URL"]]]
+                    [:button {:class "button is-success is-large" :disabled true} "Copy URL"]]]
                   [:p {:class "subtitle is-6"} (str "Long URL: ") [:a {:href (:url register)} (:url register)]]
                   [:br]
                   [:br]

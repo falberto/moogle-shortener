@@ -24,10 +24,12 @@
                                                  wrap-log-request-time]]
             [ring.util.response :as response]
             [clojure.tools.logging :as log]
-            [moogle-shortener.config :as config])
+            [moogle-shortener.config :as config]
+            [ring.adapter.jetty :as jetty])
   (:import (java.util Properties)
            (java.time Instant)
-           (org.apache.commons.validator.routines UrlValidator)))
+           (org.apache.commons.validator.routines UrlValidator))
+  (:gen-class))
 
 (defn- api-url [{:keys [scheme server-name server-port]}]
   (str (name scheme) "://" server-name ":" server-port "/api"))
@@ -169,6 +171,12 @@
          :config {:validatorUrl     nil
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))))
+
+(defn -main []
+  (log/info "Staring App...")
+  (jetty/run-jetty app
+                   {:port  80
+                    :join? false}))
 
 (comment
 

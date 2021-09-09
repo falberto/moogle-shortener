@@ -20,8 +20,7 @@
                  [borkdude/sci "0.2.6"]
                  [org.xerial/sqlite-jdbc "3.36.0.1"]
                  [com.github.seancorfield/next.jdbc "1.2.689"]]
-
-  :main moogle-shortener.core
+  :main moogle-shortener.web
   ;:aot :all
   :profiles {:dev     {:source-paths ["dev"]
                        :dependencies [[org.clojure/test.check "1.1.0"]
@@ -30,7 +29,6 @@
   :resource-paths ["resources"]
   :plugins [[lein-environ "1.2.0"]
             [lein-ring "0.12.5"]]
-  :repl-options {:init-ns moogle-shortener.core}
-  :ring {:handler moogle-shortener.web/app
-         :init    moogle-shortener.core/-main})
+  :repl-options {:init-ns user}
+  :ring {:handler moogle-shortener.web/app})
 

@@ -10,7 +10,8 @@
 (defonce SHORTENED "shortened")
 
 (defn- api-url [{:keys [scheme server-name server-port]}]
-  (str (name scheme) "://" server-name ":" server-port))
+  (let [port (when-not (= 80 server-port) (str ":" server-port))]
+    (str (name scheme) "://" server-name port)))
 
 (defn main-page [req]
   {:status  200
@@ -48,10 +49,6 @@
                   :created   (Instant/now)}]
     (save-shortener! db register)
     (html/shortener (assoc register :host base-url))))
-
-(defn -main [& args]
-  (log/info "Starting App..."))
-
 
 (comment
   (nano/nano-id 8)
