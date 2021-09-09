@@ -46,24 +46,23 @@
                 [:div {:class "container box"}
                  [:h1 {:class "title is-4"} "Your shortened URL"]
                  [:h5 {:class "subtitle is-6"} "Copy the shortened link and share it in messages, texts, posts, websites and other locations"]
-                 [:form {:method "POST" :action "shortener"}
-                  [:div {:class "field has-addons"}
-                   [:div {:class "control is-expanded"}
-                    [:input {:class "input is-large" :type "text" :value (:shortened register) :read-only true}]]
-                   [:div {:class "control"}
-                    [:button {:class "button is-success is-large" :disabled true} "Copy URL"]]]
-                  [:p {:class "subtitle is-6"} (str "Long URL: ") [:a {:href (:url register)} (:url register)]]
-                  [:br]
-                  [:br]
-                  [:h2 {:class "title is-h2"} "Share URL"]
-                  [:div {:class "buttons"}
-                   [:a {:class "button is-medium is-facebook"}
-                    [:span {:class "icon"}
-                     [:i {:class "fab fa-facebook"}]]
-                    [:span "Facebook"]]
-                   [:a {:class "button is-medium is-twitter"}
-                    [:span {:class "icon"}
-                     [:i {:class "fab fa-twitter"}]]
-                    [:span "Twitter"]]]
-                  [:br]]]]]))
+                 [:div {:class "field has-addons"}
+                  [:div {:class "control is-expanded"}
+                   [:input {:class "input is-large" :type "text" :value (:shortened register) :read-only true}]]
+                  [:div {:class "control"}
+                   [:button {:class "button is-success is-large"} "Copy URL"]]]
+                 [:p {:class "subtitle is-6"} (str "Long URL: ") [:a {:href (:url register)} (:url register)]]
+                 [:br]
+                 [:br]
+                 [:h2 {:class "title is-h2"} "Share URL"]
+                 [:div {:class "buttons"}
+                  [:a {:class "button is-medium is-facebook"}
+                   [:span {:class "icon"}
+                    [:i {:class "fab fa-facebook"}]]
+                   [:span "Facebook"]]
+                  [:a {:class "button is-medium is-twitter"}
+                   [:span {:class "icon"}
+                    [:i {:class "fab fa-twitter"}]]
+                   [:span "Twitter"]]]
+                 [:br]]]]))
 

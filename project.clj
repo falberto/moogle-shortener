@@ -22,6 +22,7 @@
                  [com.github.seancorfield/next.jdbc "1.2.689"]]
   :main moogle-shortener.web
   ;:aot :all
+  :uberjar-name "moogle-shortener.jar"
   :profiles {:dev     {:source-paths ["dev"]
                        :dependencies [[org.clojure/test.check "1.1.0"]
                                       [ch.qos.logback/logback-classic "1.2.5"]]}}
