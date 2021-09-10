@@ -2,7 +2,7 @@
 
 Moogle Shortener is a website that will allow you make URL Shortener.
 
-I did this project as an exercise to improve my clojure skills.
+I make this project as an exercise to improve my clojure skills.
 Technologies used:
 - Reiit - A fast data-driven router for Clojure(Script).
 - Hiccup - A library for representing HTML in Clojure.
